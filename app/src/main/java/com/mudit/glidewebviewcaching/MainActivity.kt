@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(webView)
 
-        webView.loadUrl("https://www.gumlet.com/")
+        webView.loadUrl("https://imgur.com/")
     }
 
     private fun getChromeClient(): WebChromeClient {
@@ -56,20 +56,30 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
-                if(url == null){
-                    return super.shouldInterceptRequest(view, url as String)
-                }
-                return if(url.toLowerCase(Locale.ROOT).contains(".jpg") || url.toLowerCase(Locale.ROOT).contains(".jpeg")){
-                    val bitmap = Glide.with(webView).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).load(url).submit().get()
-                    WebResourceResponse("image/jpg", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.JPEG))
-                 }else if(url.toLowerCase(Locale.ROOT).contains(".png")){
-                    val bitmap = Glide.with(webView).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).load(url).submit().get()
-                    WebResourceResponse("image/png", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.PNG))
-                }else if(url.toLowerCase(Locale.ROOT).contains(".webp")){
-                    val bitmap = Glide.with(webView).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).load(url).submit().get()
-                    WebResourceResponse("image/webp", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.WEBP))
-                }else{
-                    super.shouldInterceptRequest(view, url)
+                try{
+                    if(url == null){
+                        return super.shouldInterceptRequest(view, url as String)
+                    }
+                    return if(url.toLowerCase(Locale.ROOT).contains(".jpg") || url.toLowerCase(Locale.ROOT).contains(".jpeg")){
+                        val bitmap = Glide.with(webView).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).load(url).submit().get()
+                        WebResourceResponse("image/jpg", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.JPEG))
+                    }else if(url.toLowerCase(Locale.ROOT).contains(".png")){
+                        val bitmap = Glide.with(webView).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).load(url).submit().get()
+                        WebResourceResponse("image/png", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.PNG))
+                    }else if(url.toLowerCase(Locale.ROOT).contains(".webp")){
+                        val bitmap = Glide.with(webView).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).load(url).submit().get()
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                            WebResourceResponse("image/webp", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.WEBP_LOSSY))
+                        } else {
+                            WebResourceResponse("image/webp", "UTF-8",getBitmapInputStream(bitmap,CompressFormat.WEBP))
+
+                        }
+
+                    }else{
+                        super.shouldInterceptRequest(view, url)
+                    }
+                }catch (e:Exception){
+                    return super.shouldInterceptRequest(view, url)
                 }
 
             }
